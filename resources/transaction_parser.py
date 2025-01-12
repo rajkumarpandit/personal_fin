@@ -2,7 +2,7 @@ import os
 import re
 import streamlit as st
 from datetime import datetime, timedelta
-from langchain_core.exceptions import OutputParserException
+#from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
@@ -74,9 +74,9 @@ def parse_transaction(desc):
     chain_extract = prompt_extract | llm
     res = chain_extract.invoke(input={"desc": desc})
     # print(res)
-    try:
-        raw_json = extract_json(res.content)
-        json_parser = JsonOutputParser()
-        return json_parser.parse(raw_json)
-    except OutputParserException as e:
-        raise OutputParserException(f"Error parsing transaction: {str(e)}")
+    #try:
+    raw_json = extract_json(res.content)
+    json_parser = JsonOutputParser()
+    return json_parser.parse(raw_json)
+    #except OutputParserException as e:
+    #    raise OutputParserException(f"Error parsing transaction: {str(e)}")
