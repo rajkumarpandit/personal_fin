@@ -1,11 +1,13 @@
 import sqlite3
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
+import streamlit as st
 
-load_dotenv()
-db_file_name = os.getenv("DATABSE_FILE_NAME")
-db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
-
+#load_dotenv()
+#db_file_name = os.getenv("DATABSE_FILE_NAME")
+#db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
+db_file_name = st.secrets["api_keys"]["DATABSE_FILE_NAME"]
+db_txn_table_name = st.secrets["api_keys"]["DB_TRANSACTION_TABLE_NAME"]
 
 def create_table():
     """
