@@ -1,17 +1,19 @@
 import os
 import re
+import streamlit as st
 from datetime import datetime, timedelta
 from langchain_core.exceptions import OutputParserException
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv()
-
+#load_dotenv()
+groq_key = st.secrets["api_keys"]["GROQ_API_KEY"]
+#os.getenv("GROQ_API_KEY")
 # Initialize ChatGroq LLM
 llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=groq_key,
     model_name="llama-3.1-70b-versatile",
     temperature=0,
     max_tokens=2048
