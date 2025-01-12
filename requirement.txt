@@ -1,0 +1,8 @@
+streamlit
+pandas
+sqlite3
+python-dotenv
+langchain
+groqflow
+langchain-groq
+langchain-core
