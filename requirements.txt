@@ -11,3 +11,4 @@ markdown-it-py==3.0.0
 numpy==1.26.4
 regex==2024.11.6
 streamlit==1.41.1
+pandas

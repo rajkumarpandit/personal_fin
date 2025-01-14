@@ -68,7 +68,7 @@ def parse_transaction(desc):
     - Transaction Amount
     - Transaction Currency
     - Transaction Category
-    - Transaction desc
+    - Transaction Description
     """
     prompt_extract = PromptTemplate.from_template(prompt_text.replace('<<<desc>>>', '{desc}'))
     chain_extract = prompt_extract | llm

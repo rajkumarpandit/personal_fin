@@ -1,13 +1,14 @@
 import sqlite3
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import streamlit as st
 
-#load_dotenv()
-#db_file_name = os.getenv("DATABSE_FILE_NAME")
-#db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
+# load_dotenv()
+# db_file_name = os.getenv("DATABSE_FILE_NAME")
+# db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
 db_file_name = st.secrets["api_keys"]["DATABSE_FILE_NAME"]
 db_txn_table_name = st.secrets["api_keys"]["DB_TRANSACTION_TABLE_NAME"]
+
 
 def create_table():
     """
@@ -54,7 +55,7 @@ def insert_record(record):
         record["Transaction Amount"],
         record["Transaction Currency"],
         record["Transaction Category"],
-        record["Transaction desc"]
+        record["Transaction Description"]
     ))
 
     existing_record = cursor.fetchone()
@@ -74,7 +75,7 @@ def insert_record(record):
             record["Transaction Amount"],
             record["Transaction Currency"],
             record["Transaction Category"],
-            record["Transaction desc"]
+            record["Transaction Description"]
         ))
         conn.commit()
         print("Committed")
@@ -93,3 +94,15 @@ def get_all_table_name():
     all_tables = [result[i][0] for i in range(len(result))]
     return all_tables
     conn.close()
+
+
+def fetch_all_records():
+    conn = sqlite3.connect(db_file_name)
+    cursor = conn.cursor()
+    cursor.execute(f"""select transaction_date, bank_name,account_type,transaction_amount,transaction_currency,transaction_category, transaction_desc
+        from  {db_txn_table_name}
+        order by transaction_date desc
+    """)
+    records = cursor.fetchall()
+    conn.close()
+    return records

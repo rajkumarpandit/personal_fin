@@ -1,13 +1,24 @@
 import streamlit as st
+import os
+import pandas as pd
 from transaction_parser import parse_transaction  # Import the parse_transaction function
-from db_operations import insert_record  # Import the insert_record function for saving to SQLite
+from db_operations import insert_record, fetch_all_records  # Import database functions
+
+# Image file path
+image_path = os.path.join(os.path.dirname(__file__), "./images/finance_image.jpg")
 
 
-# Streamlit App
-def main():
-    # Set the browser title
-    st.set_page_config(page_title="Personal Finance")
+# Function for the Home page
+def home_page():
+    st.title("Personal Finance App")
+    if os.path.exists(image_path):
+        st.image(image_path, caption="Manage your finances efficiently!", width=400)  # Fixed width
+    else:
+        st.error(f"Image file not found! {image_path}")
 
+
+# Function for the Add Transaction page
+def add_transaction_page():
     # Initialize session state for input, output, and save button state
     if "transaction_desc" not in st.session_state:
         st.session_state.transaction_desc = ""
@@ -164,6 +175,87 @@ def main():
         if cancel_clicked:
             reset()
             message_placeholder.info("All data cleared. Ready for a new transaction.")
+
+
+# Function for the Display Transactions page
+def display_transactions_page():
+    st.title("All Transactions")
+    records = fetch_all_records()  # Fetch all records from the database
+
+    if records:
+        # Convert records to a DataFrame
+        df = pd.DataFrame(records)
+        df = df.fillna("")
+        df = df.reset_index(drop=True)
+        df.columns = ["Transaction Date", "Bank Name", "Account Type", "Amount", "Currency", "Category", "Short Desc."]
+
+        # Ensure all columns are of type string to avoid slicing issues
+        df = df.astype(str)
+
+        # Pagination
+        page_size = 10  # Number of rows per page
+        total_pages = (len(df) // page_size) + (1 if len(df) % page_size != 0 else 0)
+
+        # Initialize session state for pagination
+        if "pagination_page" not in st.session_state:
+            st.session_state.pagination_page = 1  # Start at page 1
+
+        # Display the current page of the DataFrame
+        start_idx = (st.session_state.pagination_page - 1) * page_size
+        end_idx = start_idx + page_size
+        st.dataframe(df.iloc[start_idx:end_idx], hide_index=True)
+
+        # Pagination controls at the bottom right
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col2:
+            if st.button("Previous") and st.session_state.pagination_page > 1:
+                st.session_state.pagination_page -= 1  # Decrease page number
+        with col3:
+            if st.button("Next") and st.session_state.pagination_page < total_pages:
+                st.session_state.pagination_page += 1  # Increase page number
+
+        # Display current page and total pages
+        st.caption(f"Page {st.session_state.pagination_page} of {total_pages}")
+    else:
+        st.info("No transactions found in the database.")
+
+
+# Main function to handle the app layout and navigation
+def main():
+    # Set the browser title
+    st.set_page_config(page_title="Personal Finance")
+
+    # Initialize session state for the current page
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "home"
+
+    # Sidebar menu with buttons of the same size
+    st.sidebar.title("Menu")
+    st.sidebar.markdown(
+        """
+        <style>
+            .sidebar-button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.sidebar.button("Home", key="home_button"):
+        st.session_state.current_page = "home"
+    if st.sidebar.button("Add Transaction", key="add_transaction_button"):
+        st.session_state.current_page = "add_transaction"
+    if st.sidebar.button("Display Transactions", key="display_transactions_button"):
+        st.session_state.current_page = "display_transactions"
+
+    # Display the selected page based on session state
+    if st.session_state.current_page == "home":
+        home_page()
+    elif st.session_state.current_page == "add_transaction":
+        add_transaction_page()
+    elif st.session_state.current_page == "display_transactions":
+        display_transactions_page()
 
 
 # Run the app
