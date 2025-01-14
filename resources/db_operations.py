@@ -1,11 +1,7 @@
 import sqlite3
 from datetime import datetime, date, timedelta
-from dateutil.relativedelta import relativedelta, MO
 import streamlit as st
 
-# load_dotenv()
-# db_file_name = os.getenv("DATABSE_FILE_NAME")
-# db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
 db_file_name = st.secrets["api_keys"]["DATABSE_FILE_NAME"]
 db_txn_table_name = st.secrets["api_keys"]["DB_TRANSACTION_TABLE_NAME"]
 selected_col_names = ("transaction_date, bank_name, account_type, transaction_amount, transaction_currency, "
@@ -144,7 +140,12 @@ def fetch_last_week_transactions():
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     today = date.today()
-    last_monday = today + relativedelta(weekday=MO(-2))
+    # Calculate the day of the week (Monday=0, Sunday=6)
+    today_weekday = today.weekday()
+    days_to_subtract = today_weekday
+    # if today_weekday != 0:  # If today is Monday or before, subtract 7 days
+    days_to_subtract = 7 + today_weekday
+    last_monday = today - timedelta(days=days_to_subtract)
     last_week_start = last_monday.strftime("%Y-%m-%d")
     last_week_end = (last_monday + timedelta(days=6)).strftime("%Y-%m-%d")
     cursor.execute(f"""SELECT {selected_col_names} FROM {db_txn_table_name} 
