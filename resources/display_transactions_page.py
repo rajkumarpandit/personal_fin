@@ -9,8 +9,9 @@ from db_operations import (
     fetch_last_month_transactions,
 )
 
+
 def display_transactions_page():
-    st.title("All Transactions")
+    st.title("Transactions Report")
 
     # Define the filter options
     filter_options = [
@@ -84,7 +85,7 @@ def display_transactions_page():
         # Display the current page of the DataFrame
         start_idx = (st.session_state.pagination_page - 1) * page_size
         end_idx = start_idx + page_size
-
+        st.caption(f"Page {st.session_state.pagination_page} of {total_pages}, Total Records: {len(df)}, Showing {page_size} Rows per page")
         # Make the table wider by using the full container width
         st.dataframe(
             df.iloc[start_idx:end_idx],
@@ -93,7 +94,9 @@ def display_transactions_page():
         )
 
         # Pagination controls at the bottom right
-        col1, col2, col3 = st.columns([3, 1, 1])
+        # col1, col2, col3 = st.columns([3, 1, 1])
+        col_empty, col_empty, col_empty, col_empty, col_empty, col_empty, col2, col3 = st.columns(
+            [2, 1, 1, 1, 1, 1, 1, 1])
         with col2:
             if st.button("Previous") and st.session_state.pagination_page > 1:
                 st.session_state.pagination_page -= 1  # Decrease page number
@@ -102,7 +105,6 @@ def display_transactions_page():
                 st.session_state.pagination_page += 1  # Increase page number
 
         # Display current page, total pages, and total number of records
-        st.caption(f"Page {st.session_state.pagination_page} of {total_pages} | Total Records: {len(df)}")
+        # st.caption(f"Page {st.session_state.pagination_page} of {total_pages} | Total Records: {len(df)}")
     else:
         st.info("No transactions found for the selected filter.")
-

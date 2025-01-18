@@ -20,7 +20,7 @@ def add_transaction_page():
         st.rerun()  # Force a rerun to refresh the UI
 
     # Title of the app
-    st.title("Transaction Details Parser")
+    st.title("Add Transactions")
 
     # Custom CSS for styling
     st.markdown(
@@ -56,22 +56,23 @@ def add_transaction_page():
     message_placeholder = st.empty()
 
     # Text input for the transaction description
-    st.subheader("Enter Transaction Description in Simple English:", divider='gray')
-    st.markdown(
-        '<p class="example-text"><small>Example: Today, I ate at the A2B restaurant and paid the bill of Rs 500 using '
-        'my Citi savings account.</small></p>',
-        unsafe_allow_html=True)
+    st.subheader("Enter Transaction Description in Simple English", divider='gray')
+
     transaction_input = st.text_input(
         "",
         value=st.session_state.transaction_desc,  # Dynamically set value from session state
         key="transaction_input",
         label_visibility="collapsed",  # Hide label
     )
+    st.markdown(
+        '<p class="example-text"><small>Example: Today, I ate at the A2B restaurant and paid the bill of Rs 500 using '
+        'my Citi savings account.</small></p>',
+        unsafe_allow_html=True)
 
     # Buttons: Parse Transaction and Reset with equal size
     col1, col2 = st.columns(2, gap="small")
     with col1:
-        parse_clicked = st.button("Parse Transaction", use_container_width=True)
+        parse_clicked = st.button("Parse This Text", use_container_width=True)
     with col2:
         reset_clicked = st.button("Reset", use_container_width=True)
 

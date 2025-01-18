@@ -2,6 +2,7 @@ import streamlit as st
 from home_page import home_page
 from add_transaction_page import add_transaction_page
 from display_transactions_page import display_transactions_page
+from delete_transactions_page import delete_transactions_page  # Import the new page
 
 
 # Main function to handle the app layout and navigation
@@ -61,11 +62,13 @@ def main():
         st.session_state.current_page = "add_transaction"
     if st.sidebar.button("📄 Display Transactions", key="display_transactions_button"):
         st.session_state.current_page = "display_transactions"
+    if st.sidebar.button("🗑️ Delete Transactions", key="delete_transactions_button"):  # New button
+        st.session_state.current_page = "delete_transactions"
 
     # Add footer message at the bottom of the sidebar
     st.sidebar.markdown(
-        '<div class="footer"></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>All rights '
-        'reserved @rajkumarpandit</div>',
+        '<div class="footer"></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>'
+        'All rights reserved @rajkumarpandit</div>',
         unsafe_allow_html=True,
     )
 
@@ -76,6 +79,8 @@ def main():
         add_transaction_page()
     elif st.session_state.current_page == "display_transactions":
         display_transactions_page()
+    elif st.session_state.current_page == "delete_transactions":
+        delete_transactions_page()
 
 
 # Run the app
