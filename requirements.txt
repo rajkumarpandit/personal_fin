@@ -1,4 +1,3 @@
-groqcloud
 groq==0.15.0
 groqcloud==0.4.0
 huggingface-hub==0.27.1
