@@ -10,7 +10,7 @@ from db_operations import (
 )
 
 
-def display_transactions_page():
+def display_transactions_page(global_user_email):
     st.title("Transactions Report")
 
     # Define the filter options
@@ -52,17 +52,17 @@ def display_transactions_page():
 
     # Fetch records based on the selected filter
     if filter_option == "All Transactions":
-        records = fetch_all_records()
+        records = fetch_all_records(global_user_email)
     elif filter_option == "Today's Transactions":
-        records = fetch_todays_transactions()
+        records = fetch_todays_transactions(global_user_email)
     elif filter_option == "Yesterday's Transactions":
-        records = fetch_yesterdays_transactions()
+        records = fetch_yesterdays_transactions(global_user_email)
     elif filter_option == "Last Week's Transactions":
-        records = fetch_last_week_transactions()
+        records = fetch_last_week_transactions(global_user_email)
     elif filter_option == "This Month's Transactions":
-        records = fetch_this_month_transactions()
+        records = fetch_this_month_transactions(global_user_email)
     elif filter_option == "Last Month's Transactions":
-        records = fetch_last_month_transactions()
+        records = fetch_last_month_transactions(global_user_email)
 
     if records:
         # Convert records to a DataFrame

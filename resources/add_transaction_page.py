@@ -1,9 +1,10 @@
 import streamlit as st
+from datetime import datetime
 from transaction_parser import parse_transaction  # Import the parse_transaction function
 from db_operations import insert_record  # Import the insert_record function
 
 
-def add_transaction_page():
+def add_transaction_page(global_user_email):
     # Initialize session state for input, output, and save button state
     if "transaction_desc" not in st.session_state:
         st.session_state.transaction_desc = ""
@@ -20,7 +21,7 @@ def add_transaction_page():
         st.rerun()  # Force a rerun to refresh the UI
 
     # Title of the app
-    st.title("Add Transactions")
+    st.title("Add Transaction")
 
     # Custom CSS for styling
     st.markdown(
@@ -79,12 +80,12 @@ def add_transaction_page():
     # Handle reset button click
     if reset_clicked:
         reset()
-        message_placeholder.info("Reset completed. Please enter a new transaction.")
+        message_placeholder.info("Reset completed.")
 
     # Handle Parse Transaction button click
     if parse_clicked:
         if not transaction_input.strip():
-            message_placeholder.warning("Please enter a transaction description before parsing.")
+            message_placeholder.warning("Enter a transaction description to parse.")
             st.session_state.parsed_data = None
         else:
             try:
@@ -150,7 +151,9 @@ def add_transaction_page():
         # Handle Save button click
         if save_clicked:
             try:
-                save_msg = insert_record(st.session_state.parsed_data)  # Save parsed data to the database
+                parsed_data_with_email = {**st.session_state.parsed_data, 'user_email': global_user_email}
+                parsed_data_with_audit = {**parsed_data_with_email, 'created_date': datetime.now().strftime("%Y-%m-%d")}
+                save_msg = insert_record(parsed_data_with_audit)  # Save parsed data to the database
                 message_placeholder.success(save_msg)
                 st.session_state.save_enabled = False  # Disable Save button after saving
 

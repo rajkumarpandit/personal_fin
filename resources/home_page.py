@@ -4,6 +4,7 @@ import os
 # Image file path
 image_path = os.path.join(os.path.dirname(__file__), "./images/finance_image.jpg")
 
+
 def home_page():
     st.title("Personal Finance")
     if os.path.exists(image_path):

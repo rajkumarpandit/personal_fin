@@ -7,7 +7,7 @@ import streamlit as st
 #load_dotenv()
 #db_file_name = os.getenv("DATABSE_FILE_NAME")
 #db_txn_table_name = os.getenv("DB_TRANSACTION_TABLE_NAME")
-db_file_name = st.secrets["api_keys"]["DATABSE_FILE_NAME"]
+db_file_name = st.secrets["api_keys"]["DATABASE_FILE_NAME"]
 db_txn_table_name = st.secrets["api_keys"]["DB_TRANSACTION_TABLE_NAME"]
 
 def fetch_transactions(db_path: str) -> pd.DataFrame:

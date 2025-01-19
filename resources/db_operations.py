@@ -2,8 +2,10 @@ import sqlite3
 from datetime import datetime, date, timedelta
 import streamlit as st
 
-db_file_name = st.secrets["api_keys"]["DATABSE_FILE_NAME"]
+db_file_name = st.secrets["api_keys"]["DATABASE_FILE_NAME"]
 db_txn_table_name = st.secrets["api_keys"]["DB_TRANSACTION_TABLE_NAME"]
+db_users_table_name= st.secrets["api_keys"]["DB_USER_TABLE_NAME"]
+
 selected_col_names = ("transaction_date, bank_name, account_type, transaction_amount, transaction_currency, "
                       "transaction_category, transaction_desc")
 
@@ -26,8 +28,20 @@ def create_table():
             transaction_amount REAL,
             transaction_currency TEXT,
             transaction_category TEXT,
-            transaction_desc TEXT
+            transaction_desc TEXT,
+            user_email TEXT,
+            created_date TEXT
         )
+    """)
+    cursor.execute(f"""
+    CREATE TABLE IF NOT EXISTS {db_users_table_name} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_name TEXT NOT NULL,
+        user_email TEXT NOT NULL UNIQUE,
+        user_encrypted_password TEXT NOT NULL,
+        created_by TEXT,
+        created_at TEXT
+    );
     """)
     conn.commit()
     conn.close()
@@ -49,6 +63,7 @@ def insert_record(record):
         AND coalesce(transaction_currency,'X') = coalesce(?,'X') 
         AND coalesce(transaction_category,'X') = coalesce(?,'X') 
         AND upper(coalesce(transaction_desc,'X')) = Upper(coalesce(?,'X')) 
+        AND upper(user_email) = Upper(?) 
     """, (
         record["Transaction Date"],
         record["Bank Name"],
@@ -56,7 +71,8 @@ def insert_record(record):
         record["Transaction Amount"],
         record["Transaction Currency"],
         record["Transaction Category"],
-        record["Transaction Description"]
+        record["Transaction Description"],
+        record["user_email"]
     ))
 
     existing_record = cursor.fetchone()
@@ -67,8 +83,9 @@ def insert_record(record):
             INSERT INTO {db_txn_table_name} (
                 transaction_date, bank_name, account_type,
                 transaction_amount, transaction_currency,
-                transaction_category, transaction_desc
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                transaction_category, transaction_desc, 
+                user_email, created_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?,?,?)
         """, (
             record["Transaction Date"],
             record["Bank Name"],
@@ -76,7 +93,9 @@ def insert_record(record):
             record["Transaction Amount"],
             record["Transaction Currency"],
             record["Transaction Category"],
-            record["Transaction Description"]
+            record["Transaction Description"],
+            record["user_email"],
+            record["created_date"]
         ))
         conn.commit()
         print("Committed")
@@ -98,12 +117,13 @@ def get_all_table_name():
 
 
 # Function to fetch all records
-def fetch_all_records(delete_mode=False):
+def fetch_all_records(signedin_user_email, delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     cursor.execute(f"""select {sel}
         from  {db_txn_table_name}
+        where user_email = '{signedin_user_email}'
         order by transaction_date desc
     """)
     records = cursor.fetchall()
@@ -112,13 +132,14 @@ def fetch_all_records(delete_mode=False):
 
 
 # Function to fetch today's transactions
-def fetch_todays_transactions(delete_mode=False):
+def fetch_todays_transactions(signedin_user_email,delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     today = datetime.now().strftime("%Y-%m-%d")
     cursor.execute(f"""SELECT {sel} FROM {db_txn_table_name} 
         WHERE transaction_date = ?
+        and user_email = '{signedin_user_email}'
         order by transaction_date desc
     """, (today,))
     records = cursor.fetchall()
@@ -127,13 +148,14 @@ def fetch_todays_transactions(delete_mode=False):
 
 
 # Function to fetch yesterday's transactions
-def fetch_yesterdays_transactions(delete_mode=False):
+def fetch_yesterdays_transactions(signedin_user_email,delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     cursor.execute(f"""SELECT {sel} FROM {db_txn_table_name} 
         WHERE transaction_date = ?
+        and user_email = '{signedin_user_email}'
         order by transaction_date desc
     """, (yesterday,))
     records = cursor.fetchall()
@@ -142,14 +164,14 @@ def fetch_yesterdays_transactions(delete_mode=False):
 
 
 # Function to fetch last week's transactions
-def fetch_last_week_transactions(delete_mode=False):
+def fetch_last_week_transactions(signedin_user_email,delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     today = date.today()
     # Calculate the day of the week (Monday=0, Sunday=6)
     today_weekday = today.weekday()
     days_to_subtract = today_weekday
-    # if today_weekday != 0:  # If today is Monday or before, subtract 7 days
+
     days_to_subtract = 7 + today_weekday
     last_monday = today - timedelta(days=days_to_subtract)
     last_week_start = last_monday.strftime("%Y-%m-%d")
@@ -157,6 +179,7 @@ def fetch_last_week_transactions(delete_mode=False):
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     cursor.execute(f"""SELECT {sel} FROM {db_txn_table_name} 
         WHERE transaction_date >= ? AND transaction_date <= ?
+        and user_email = '{signedin_user_email}'
         order by transaction_date desc
     """, (last_week_start, last_week_end,))
     records = cursor.fetchall()
@@ -165,7 +188,7 @@ def fetch_last_week_transactions(delete_mode=False):
 
 
 # Function to fetch this month's transactions
-def fetch_this_month_transactions(delete_mode=False):
+def fetch_this_month_transactions(signedin_user_email,delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     this_month_start = datetime.now().replace(day=1).strftime("%Y-%m-%d")
@@ -173,6 +196,7 @@ def fetch_this_month_transactions(delete_mode=False):
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     cursor.execute(f"""SELECT {sel} FROM {db_txn_table_name} 
         WHERE transaction_date >= ? AND transaction_date <= ?
+        and user_email = '{signedin_user_email}'
         order by transaction_date desc
     """, (this_month_start, today,))
     records = cursor.fetchall()
@@ -181,7 +205,7 @@ def fetch_this_month_transactions(delete_mode=False):
 
 
 # Function to fetch last month's transactions
-def fetch_last_month_transactions(delete_mode=False):
+def fetch_last_month_transactions(signedin_user_email,delete_mode=False):
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
     last_month_end = datetime.now().replace(day=1) - timedelta(days=1)
@@ -190,6 +214,7 @@ def fetch_last_month_transactions(delete_mode=False):
     sel = selected_col_names_for_delete if delete_mode else selected_col_names
     cursor.execute(f"""SELECT {sel} FROM {db_txn_table_name} 
         WHERE transaction_date BETWEEN ? AND ?
+        and user_email = '{signedin_user_email}'
         order by transaction_date desc
         """, (last_month_start, last_month_end))
     records = cursor.fetchall()
@@ -198,17 +223,18 @@ def fetch_last_month_transactions(delete_mode=False):
 
 
 # Function to delete records by their IDs
-def delete_records(record_ids):
+def delete_records(signedin_user_email, record_ids):
     """
     Deletes records from the database based on their IDs.
+    :param signedin_user_email:
     :param record_ids: List of record IDs to delete.
     """
     conn = sqlite3.connect(db_file_name)
     cursor = conn.cursor()
-    # print("Came here-In the delete portion of the DBOperations")
+
     try:
         # Delete records with the given IDs
-        cursor.executemany(f"DELETE FROM {db_txn_table_name} WHERE id = ?", [(row_id,) for row_id in record_ids])
+        cursor.executemany(f"DELETE FROM {db_txn_table_name} WHERE id = ? and user_email = '{signedin_user_email}'", [(row_id,) for row_id in record_ids])
         conn.commit()
         return True
     except Exception as e:

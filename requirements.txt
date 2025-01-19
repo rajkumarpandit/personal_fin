@@ -13,3 +13,4 @@ streamlit==1.41.1
 pandas
 datetime
 httpx==0.27.2
+bcrypt==4.0.1
