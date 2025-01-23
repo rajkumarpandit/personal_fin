@@ -29,7 +29,8 @@ def reset_session_state():
 
 
 def signup():
-    st.title("Sign Up")
+    # display_app_banner()  # Display the app banner
+    st.subheader("Sign Up")
 
     # Create a left-aligned container for the form
     with st.container():
@@ -52,19 +53,23 @@ def signup():
                                          VALUES (?, ?, ?, ?, ?)''',
                                       (user_name, user_email, hashed, 'SYSTEM', datetime.now().strftime("%Y-%m-%d")))
                             conn.commit()
+                            conn.close()
                             st.success("Account created successfully!")
+                            st.session_state.message = "Account created successfully! Please sign in."
                             st.session_state.current_page = "signin"  # Redirect to sign-in page
+                            # st.session_state.message = "Account created successfully! Please sign in."
                             st.rerun()  # Rerun to reflect the changes
                         except sqlite3.IntegrityError:
                             st.error("Email already exists. Sign-in or use a different email.")
-                        finally:
-                            conn.close()
+                        # finally:
+                            # conn.close()
                     else:
                         st.error("Fill in all required fields.")
 
 
 def signin():
-    st.title("Sign In")
+    # display_app_banner()  # Display the app banner
+    st.subheader("Sign In")
 
     # Create a left container for the form
     with st.container():
@@ -116,4 +121,32 @@ def auth_page():
         if st.session_state.current_page == "signup":
             signup()
         else:
+            # Display the success message if it exists
+            if 'message' in st.session_state and st.session_state.message:
+                st.info(st.session_state.message)
+                st.session_state.message = None  # Clear the message after displaying it
             signin()
+
+
+def display_app_banner():
+    """Display a top banner with the app name."""
+    st.markdown(
+        """
+        <style>
+            .banner {
+                background-color: #0f8ed7; /* Green background */
+                color: white; /* White text */
+                padding: 10px;
+                font-size: 24px;
+                font-weight: bold;
+                text-align: center;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+        </style>
+        <div class="banner">
+            Personal Finance Tracker
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )

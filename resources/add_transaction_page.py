@@ -2,9 +2,11 @@ import streamlit as st
 from datetime import datetime
 from transaction_parser import parse_transaction  # Import the parse_transaction function
 from db_operations import insert_record  # Import the insert_record function
+from auth import display_app_banner
 
 
 def add_transaction_page(global_user_email):
+    display_app_banner()  # Display the app banner
     # Initialize session state for input, output, and save button state
     if "transaction_desc" not in st.session_state:
         st.session_state.transaction_desc = ""
@@ -21,7 +23,8 @@ def add_transaction_page(global_user_email):
         st.rerun()  # Force a rerun to refresh the UI
 
     # Title of the app
-    st.title("Add Transaction")
+    # st.title("Add Transaction")
+    st.subheader("Add Transaction", divider='gray')
 
     # Custom CSS for styling
     st.markdown(
@@ -57,13 +60,14 @@ def add_transaction_page(global_user_email):
     message_placeholder = st.empty()
 
     # Text input for the transaction description
-    st.subheader("Enter Transaction Description in Simple English", divider='gray')
-
+    # st.subheader("Enter Transaction Description in Simple English", divider='gray')
+    # st.write("Enter Transaction Description in Simple English")
     transaction_input = st.text_input(
         "",
         value=st.session_state.transaction_desc,  # Dynamically set value from session state
         key="transaction_input",
         label_visibility="collapsed",  # Hide label
+        help="Enter Transaction Description in Simple English"
     )
     st.markdown(
         '<p class="example-text"><small>Example: Today, I ate at the A2B restaurant and paid the bill of Rs 500 using '
@@ -71,7 +75,7 @@ def add_transaction_page(global_user_email):
         unsafe_allow_html=True)
 
     # Buttons: Parse Transaction and Reset with equal size
-    col1, col2 = st.columns(2, gap="small")
+    col1, col2, col3, col4 = st.columns(4, gap="small")
     with col1:
         parse_clicked = st.button("Parse This Text", use_container_width=True)
     with col2:

@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from auth import display_app_banner
 from db_operations import (
     fetch_all_records,
     fetch_todays_transactions,
@@ -12,7 +13,8 @@ from db_operations import (
 
 
 def delete_transactions_page(global_user_email):
-    st.title("Delete Transactions")
+    display_app_banner()  # Display the app banner
+    st.subheader("Delete Transactions", divider='gray')
 
     # Initialize session state for messages
     if 'message' not in st.session_state:
