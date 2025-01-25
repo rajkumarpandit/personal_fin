@@ -14,7 +14,7 @@ groq_key = st.secrets["api_keys"]["GROQ_API_KEY"]
 # Initialize ChatGroq LLM
 llm = chat_models.ChatGroq(
     api_key=groq_key,
-    model_name="llama-3.1-70b-versatile",
+    model_name="llama-3.3-70b-versatile",
     temperature=0,
     max_tokens=2048
 )
